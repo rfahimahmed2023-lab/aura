@@ -1,47 +1,113 @@
 @import "tailwindcss";
 
+/* ============================================================
+   AURA DESIGN SYSTEM — tokens
+   ============================================================ */
+:root {
+  /* Color */
+  --bg-base: #08080d;
+  --bg-elevated: #0f0f18;
+  --cyan: #00e5ff;
+  --violet: #7a5cff;
+  --gradient-brand: linear-gradient(135deg, #00e5ff, #7a5cff);
+  --text-primary: #f5f6fa;
+  --text-secondary: rgba(245, 246, 250, 0.7);
+  --text-muted: rgba(245, 246, 250, 0.5);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* Radius */
+  --radius-button: 12px;
+  --radius-card: 16px;
+  --radius-chat: 20px;
+
+  /* Depth */
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  /* Motion */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Expose tokens to Tailwind utilities (v4) */
 @theme {
-  --color-abyss: #0a0a0f;
-  --color-charcoal: #111118;
-  --color-neon-cyan: #22d3ee;
-  --color-neon-cyan-bright: #00e5ff;
-  --color-neon-violet: #7a5cff;
-  --color-neon-violet-soft: #8b5cf6;
+  --color-bg-base: #08080d;
+  --color-bg-elevated: #0f0f18;
+  --color-cyan: #00e5ff;
+  --color-violet: #7a5cff;
+  --color-text-primary: #f5f6fa;
   --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
 }
 
-html,
+/* ============================================================
+   BASE
+   ============================================================ */
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
 body {
-  background-color: var(--color-abyss);
-  color: #e5e7eb;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
   font-family: var(--font-body);
   min-height: 100%;
 }
 
-/* ---------- Reusable surfaces ---------- */
-
-.glass {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+/* Radial gradient wash behind the hero */
+.bg-radial-hero {
+  background: radial-gradient(ellipse 90% 70% at 50% 32%, #14101f 0%, #08080d 70%);
 }
 
-.neon-border {
+::selection {
+  background: rgba(0, 229, 255, 0.22);
+  color: #fff;
+}
+
+/* ============================================================
+   TYPOGRAPHY HELPERS
+   ============================================================ */
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============================================================
+   SURFACES
+   ============================================================ */
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* Faint gradient border for the chat container */
+.gradient-border {
   position: relative;
+  border-radius: var(--radius-chat);
+  background: var(--bg-elevated);
 }
-.neon-border::before {
+.gradient-border::before {
   content: "";
   position: absolute;
-  inset: -1px;
+  inset: 0;
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(
-    135deg,
-    rgba(0, 229, 255, 0.55),
-    rgba(122, 92, 255, 0.5) 50%,
-    rgba(0, 229, 255, 0.25)
+    150deg,
+    rgba(0, 229, 255, 0.45),
+    rgba(122, 92, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0.04) 80%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -49,102 +115,88 @@ body {
   pointer-events: none;
 }
 
-.gradient-text {
-  background: linear-gradient(90deg, #00e5ff, #7a5cff 70%, #8b5cf6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* ============================================================
+   BUTTONS — hover glow + press feedback (Framer handles scale)
+   ============================================================ */
+.btn-primary {
+  background: var(--gradient-brand);
+  color: #05070a;
+  border-radius: var(--radius-button);
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 0 0 rgba(0, 229, 255, 0);
+  transition: box-shadow 180ms var(--ease-settle), filter 180ms var(--ease-settle);
+}
+.btn-primary:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 6px 30px rgba(0, 229, 255, 0.28), 0 6px 40px rgba(122, 92, 255, 0.22);
 }
 
-/* ---------- Ambient background ---------- */
-
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 75%);
+.btn-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-button);
+  font-weight: 600;
+  font-size: 15px;
+  transition: border-color 180ms var(--ease-settle), color 180ms var(--ease-settle),
+    box-shadow 180ms var(--ease-settle);
+}
+.btn-secondary:hover {
+  color: var(--text-primary);
+  border-color: rgba(0, 229, 255, 0.35);
+  box-shadow: 0 4px 24px rgba(0, 229, 255, 0.1);
 }
 
-/* ---------- Orb ---------- */
+.btn-ghost {
+  transition: color 180ms var(--ease-settle), background-color 180ms var(--ease-settle);
+}
 
+/* Focus ring (accessible) */
+.focusable:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px rgba(0, 229, 255, 0.6);
+}
+
+/* ============================================================
+   ORB
+   ============================================================ */
 .orb-core {
   background:
-    radial-gradient(circle at 35% 35%, rgba(0, 229, 255, 0.95), rgba(34, 211, 238, 0.35) 40%, transparent 65%),
-    radial-gradient(circle at 68% 62%, rgba(122, 92, 255, 0.92), rgba(139, 92, 246, 0.3) 45%, transparent 70%),
-    radial-gradient(circle at 50% 50%, rgba(17, 17, 24, 0.9), #0a0a0f 75%);
-  box-shadow:
-    0 0 40px rgba(0, 229, 255, 0.35),
-    0 0 90px rgba(122, 92, 255, 0.28),
-    inset 0 0 40px rgba(0, 229, 255, 0.18);
+    radial-gradient(circle at 35% 32%, rgba(0, 229, 255, 0.95), rgba(0, 229, 255, 0.3) 42%, transparent 66%),
+    radial-gradient(circle at 68% 66%, rgba(122, 92, 255, 0.9), rgba(122, 92, 255, 0.28) 46%, transparent 72%),
+    radial-gradient(circle at 50% 50%, rgba(20, 16, 31, 0.92), #08080d 76%);
 }
 
 .orb-ring {
   border: 1px solid transparent;
   background:
-    linear-gradient(#0a0a0f00, #0a0a0f00) padding-box,
-    conic-gradient(from 0deg, rgba(0, 229, 255, 0.7), transparent 30%, rgba(122, 92, 255, 0.7) 55%, transparent 80%, rgba(0, 229, 255, 0.7)) border-box;
+    linear-gradient(#08080d00, #08080d00) padding-box,
+    conic-gradient(
+        from 0deg,
+        rgba(0, 229, 255, 0.6),
+        transparent 30%,
+        rgba(122, 92, 255, 0.6) 55%,
+        transparent 80%,
+        rgba(0, 229, 255, 0.6)
+      )
+      border-box;
 }
 
-/* ---------- Buttons ---------- */
-
-/* Ghost/glass buttons: neon glow on hover (GPU-cheap: opacity on a pseudo layer) */
-.btn-ghost {
-  position: relative;
-  isolation: isolate;
-}
-.btn-ghost::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow:
-    0 0 16px rgba(0, 229, 255, 0.25),
-    0 0 30px rgba(122, 92, 255, 0.18),
-    inset 0 0 0 1px rgba(0, 229, 255, 0.35);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-  z-index: -1;
-}
-.btn-ghost:hover::after,
-.btn-ghost:focus-visible::after {
-  opacity: 1;
+/* ============================================================
+   AMBIENT GRID
+   ============================================================ */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 78% 68% at 50% 36%, black 28%, transparent 76%);
 }
 
-/* Primary CTA glow */
-.btn-primary {
-  box-shadow: 0 0 28px rgba(0, 229, 255, 0.45);
-  transition: box-shadow 0.3s ease;
-}
-.btn-primary:hover,
-.btn-primary:focus-visible {
-  box-shadow:
-    0 0 34px rgba(0, 229, 255, 0.5),
-    0 0 54px rgba(122, 92, 255, 0.45);
-}
-
-/* ---------- Logo glow pulse ---------- */
-
-.logo-glow {
-  position: relative;
-}
-.logo-glow::before {
-  content: "";
-  position: absolute;
-  inset: -35%;
-  border-radius: 9999px;
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.5), rgba(122, 92, 255, 0.3) 55%, transparent 75%);
-  filter: blur(10px);
-  animation: logo-pulse 4.5s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-@keyframes logo-pulse {
-  0%, 100% { opacity: 0.35; transform: scale(0.92); }
-  50% { opacity: 0.8; transform: scale(1.08); }
-}
-
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -155,14 +207,13 @@ body {
   }
 }
 
-/* ---------- Botpress webchat embedding ---------- */
-
-/* Never show the default floating bubble */
+/* ============================================================
+   BOTPRESS WEBCHAT EMBEDDING (do not remove — keeps chat on-brand)
+   ============================================================ */
 .bpFab {
   display: none !important;
 }
 
-/* Our custom mount target */
 #aura-webchat {
   position: relative;
   height: 100%;
@@ -170,7 +221,6 @@ body {
   overflow: hidden;
 }
 
-/* Whatever Botpress renders inside the container must fill it, never float */
 #aura-webchat .bpWebchat,
 #aura-webchat .bpEmbeddedWebchat {
   position: absolute !important;

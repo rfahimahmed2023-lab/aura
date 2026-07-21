@@ -1,81 +1,97 @@
 import { motion } from 'framer-motion'
+import { FileText, Compass, BarChart3, ArrowRight } from 'lucide-react'
 import AuraOrb from './AuraOrb'
-import { buttonMotion, pageLoadedHidden } from '../lib/motion'
+import { PrimaryButton, SecondaryButton } from './Buttons'
+import { heroStagger, heroItem, pageLoadedHidden } from '../lib/motion'
 
-const HIGHLIGHTS = [
-  { icon: '📄', label: 'Analyze your resume' },
-  { icon: '🎯', label: 'Discover matching careers' },
-  { icon: '📊', label: 'See your skill gaps' },
+const FEATURES = [
+  {
+    label: 'Analyze your resume',
+    icon: FileText,
+    starter: "I'd like to analyze my resume.",
+  },
+  {
+    label: 'Discover matching careers',
+    icon: Compass,
+    starter: 'Help me discover careers that match my skills.',
+  },
+  {
+    label: 'See your skill gaps',
+    icon: BarChart3,
+    starter: 'Can you show me my skill gaps for a career?',
+  },
 ]
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
-}
-
-const item = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
-}
-
-export default function Hero({ onStart }) {
+export default function Hero({ onOpenChat, onSendStarter }) {
   return (
-    <motion.div
-      variants={container}
+    <motion.section
+      variants={heroStagger}
       initial={pageLoadedHidden ? false : 'hidden'}
       animate="show"
-      className="flex flex-col items-center gap-8 text-center lg:items-start lg:text-left"
+      className="flex flex-col items-center px-6 pt-20 pb-24 text-center sm:pt-28 lg:pt-32"
     >
-      <motion.div variants={item} className="lg:self-start">
-        <AuraOrb size={160} />
+      {/* Orb — hero anchor */}
+      <motion.div variants={heroItem}>
+        <AuraOrb size={132} />
       </motion.div>
 
+      {/* Eyebrow / tagline */}
+      <motion.p variants={heroItem} className="eyebrow mt-10">
+        AI-powered Universal Recommendation Assistant
+      </motion.p>
+
+      {/* H1 */}
       <motion.h1
-        variants={item}
-        className="font-display text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl"
+        variants={heroItem}
+        className="mt-5 max-w-4xl font-display font-bold text-text-primary"
+        style={{
+          fontSize: 'clamp(48px, 7vw, 88px)',
+          lineHeight: 1.02,
+          letterSpacing: '-0.02em',
+        }}
       >
         <span className="gradient-text">AURA</span> — Your AI Career Guide
       </motion.h1>
 
-      <motion.p variants={item} className="max-w-xl text-lg leading-relaxed text-gray-400">
-        <span className="font-medium text-gray-200">
-          AI-powered Universal Recommendation Assistant
-        </span>{' '}
-        — chat with AURA to map your strengths, explore career paths, and get a
-        personalized plan for what to learn next.
+      {/* Sub-headline */}
+      <motion.p
+        variants={heroItem}
+        className="mt-6 max-w-2xl"
+        style={{
+          fontSize: 'clamp(18px, 2.2vw, 24px)',
+          lineHeight: 1.5,
+          fontWeight: 400,
+          color: 'var(--text-secondary)',
+        }}
+      >
+        Map your strengths, explore career paths, and get a personalized plan for
+        what to learn next — all in one conversation.
       </motion.p>
 
-      <motion.ul variants={item} className="flex flex-wrap justify-center gap-3 lg:justify-start">
-        {HIGHLIGHTS.map(({ icon, label }) => (
-          <li
-            key={label}
-            className="glass flex items-center gap-2 rounded-full px-4 py-2 text-sm text-gray-200"
-          >
-            <span aria-hidden="true">{icon}</span>
-            {label}
-          </li>
-        ))}
-      </motion.ul>
-
-      <motion.div variants={item} className="lg:hidden">
-        <StartButton onClick={onStart} />
+      {/* Primary CTA */}
+      <motion.div variants={heroItem} className="mt-10">
+        <PrimaryButton onClick={onOpenChat} className="text-base">
+          Start chatting
+          <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" />
+        </PrimaryButton>
       </motion.div>
-    </motion.div>
-  )
-}
 
-export function StartButton({ onClick, className = '' }) {
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      {...buttonMotion}
-      className={`group btn-primary relative rounded-full bg-gradient-to-r from-neon-cyan to-neon-violet px-8 py-3.5 font-display text-base font-semibold text-abyss focus:outline-none focus-visible:ring-2 focus-visible:ring-neon-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-abyss ${className}`}
-    >
-      Start chatting
-      <span aria-hidden="true" className="ml-2 inline-block transition-transform group-hover:translate-x-1">
-        →
-      </span>
-    </motion.button>
+      {/* Feature buttons — one evenly-spaced row (equal width via grid) */}
+      <motion.div
+        variants={heroItem}
+        className="mt-8 grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3"
+      >
+        {FEATURES.map(({ label, icon, starter }) => (
+          <SecondaryButton
+            key={label}
+            icon={icon}
+            onClick={() => onSendStarter(starter)}
+            className="w-full"
+          >
+            {label}
+          </SecondaryButton>
+        ))}
+      </motion.div>
+    </motion.section>
   )
 }

@@ -33,7 +33,7 @@ const AURA_CONFIGURATION = {
   botDescription: 'AI-powered Universal Recommendation Assistant',
   embeddedChatId: WEBCHAT_CONTAINER_ID,
   themeMode: 'dark',
-  color: '#22d3ee',
+  color: '#00e5ff',
   variant: 'solid',
   headerVariant: 'glass',
   radius: 2,
@@ -42,6 +42,31 @@ const AURA_CONFIGURATION = {
   allowFileUpload: true,
   showPoweredBy: false,
   additionalStylesheet: AURA_WEBCHAT_CSS,
+}
+
+/**
+ * Opens the underlying Botpress webchat (verified v3.6 API:
+ * window.botpress.open). Safe to call repeatedly.
+ */
+export function openWebchat() {
+  try {
+    window.botpress?.open?.()
+  } catch (err) {
+    console.warn('[AURA] openWebchat failed', err)
+  }
+}
+
+/**
+ * Sends a starter message to AURA on the user's behalf (verified v3.6 API:
+ * window.botpress.sendMessage). Used by the feature buttons.
+ */
+export function sendToAura(text) {
+  try {
+    const p = window.botpress?.sendMessage?.(text)
+    if (p?.catch) p.catch((err) => console.warn('[AURA] sendMessage failed', err))
+  } catch (err) {
+    console.warn('[AURA] sendToAura failed', err)
+  }
 }
 
 /**
