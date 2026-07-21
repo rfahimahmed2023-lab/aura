@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+@theme {
+  --color-abyss: #0a0a0f;
+  --color-charcoal: #111118;
+  --color-neon-cyan: #22d3ee;
+  --color-neon-cyan-bright: #00e5ff;
+  --color-neon-violet: #7a5cff;
+  --color-neon-violet-soft: #8b5cf6;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+html,
+body {
+  background-color: var(--color-abyss);
+  color: #e5e7eb;
+  font-family: var(--font-body);
+  min-height: 100%;
+}
+
+/* ---------- Reusable surfaces ---------- */
+
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.neon-border {
+  position: relative;
+}
+.neon-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 229, 255, 0.55),
+    rgba(122, 92, 255, 0.5) 50%,
+    rgba(0, 229, 255, 0.25)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #00e5ff, #7a5cff 70%, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- Ambient background ---------- */
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 75%);
+}
+
+/* ---------- Orb ---------- */
+
+.orb-core {
+  background:
+    radial-gradient(circle at 35% 35%, rgba(0, 229, 255, 0.95), rgba(34, 211, 238, 0.35) 40%, transparent 65%),
+    radial-gradient(circle at 68% 62%, rgba(122, 92, 255, 0.92), rgba(139, 92, 246, 0.3) 45%, transparent 70%),
+    radial-gradient(circle at 50% 50%, rgba(17, 17, 24, 0.9), #0a0a0f 75%);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.35),
+    0 0 90px rgba(122, 92, 255, 0.28),
+    inset 0 0 40px rgba(0, 229, 255, 0.18);
+}
+
+.orb-ring {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#0a0a0f00, #0a0a0f00) padding-box,
+    conic-gradient(from 0deg, rgba(0, 229, 255, 0.7), transparent 30%, rgba(122, 92, 255, 0.7) 55%, transparent 80%, rgba(0, 229, 255, 0.7)) border-box;
+}
+
+/* ---------- Buttons ---------- */
+
+/* Ghost/glass buttons: neon glow on hover (GPU-cheap: opacity on a pseudo layer) */
+.btn-ghost {
+  position: relative;
+  isolation: isolate;
+}
+.btn-ghost::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    0 0 16px rgba(0, 229, 255, 0.25),
+    0 0 30px rgba(122, 92, 255, 0.18),
+    inset 0 0 0 1px rgba(0, 229, 255, 0.35);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.btn-ghost:hover::after,
+.btn-ghost:focus-visible::after {
+  opacity: 1;
+}
+
+/* Primary CTA glow */
+.btn-primary {
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.45);
+  transition: box-shadow 0.3s ease;
+}
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  box-shadow:
+    0 0 34px rgba(0, 229, 255, 0.5),
+    0 0 54px rgba(122, 92, 255, 0.45);
+}
+
+/* ---------- Logo glow pulse ---------- */
+
+.logo-glow {
+  position: relative;
+}
+.logo-glow::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.5), rgba(122, 92, 255, 0.3) 55%, transparent 75%);
+  filter: blur(10px);
+  animation: logo-pulse 4.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+@keyframes logo-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Botpress webchat embedding ---------- */
+
+/* Never show the default floating bubble */
+.bpFab {
+  display: none !important;
+}
+
+/* Our custom mount target */
+#aura-webchat {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Whatever Botpress renders inside the container must fill it, never float */
+#aura-webchat .bpWebchat,
+#aura-webchat .bpEmbeddedWebchat {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
