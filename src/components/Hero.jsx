@@ -3,6 +3,7 @@ import { FileText, Compass, BarChart3, ArrowRight } from 'lucide-react'
 import AuraOrb from './AuraOrb'
 import Magnetic from './Magnetic'
 import MouseParallax from './MouseParallax'
+import { RevealWord, revealLine, IgnitionBloom } from './CinematicIntro'
 import { PrimaryButton, SecondaryButton } from './Buttons'
 import { heroStagger, heroItem, pageLoadedHidden } from '../lib/motion'
 
@@ -34,7 +35,8 @@ export default function Hero({ onOpenChat, onSendStarter }) {
     >
       {/* Orb — hero anchor */}
       <motion.div variants={heroItem}>
-        <MouseParallax strength={10}>
+        <MouseParallax strength={10} className="relative">
+          <IgnitionBloom />
           <AuraOrb size={132} />
         </MouseParallax>
       </motion.div>
@@ -44,9 +46,9 @@ export default function Hero({ onOpenChat, onSendStarter }) {
         AI-powered Universal Recommendation Assistant
       </motion.p>
 
-      {/* H1 */}
+      {/* H1 — same text, revealed word by word through a masked line */}
       <motion.h1
-        variants={heroItem}
+        variants={revealLine}
         className="mt-5 max-w-4xl font-display font-bold text-text-primary"
         style={{
           fontSize: 'clamp(48px, 7vw, 88px)',
@@ -54,7 +56,10 @@ export default function Hero({ onOpenChat, onSendStarter }) {
           letterSpacing: '-0.02em',
         }}
       >
-        <span className="gradient-text">AURA</span> — Your AI Career Guide
+        <RevealWord className="gradient-text">AURA</RevealWord>{' '}
+        <RevealWord>—</RevealWord> <RevealWord>Your</RevealWord>{' '}
+        <RevealWord>AI</RevealWord> <RevealWord>Career</RevealWord>{' '}
+        <RevealWord>Guide</RevealWord>
       </motion.h1>
 
       {/* Sub-headline */}

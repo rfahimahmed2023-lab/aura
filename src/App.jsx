@@ -7,6 +7,7 @@ import ChatModal from './components/ChatModal'
 import AmbientBackground from './components/AmbientBackground'
 import AuroraCanvas from './components/AuroraCanvas'
 import Spotlight from './components/Spotlight'
+import ParallaxLayer from './components/ParallaxLayer'
 import BrandMark, { LOGO_SOURCES } from './components/BrandMark'
 import { SecondaryButton } from './components/Buttons'
 import { useBotpress, openWebchat, sendToAura } from './hooks/useBotpress'
@@ -36,7 +37,7 @@ export default function App() {
       {/* Slim brand header — intentionally low-contrast so the hero stays the focus */}
       <motion.header
         initial={pageLoadedHidden ? false : { opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ opacity: chatOpen ? 0.5 : 1, y: 0 }}
         transition={{ duration: 0.5, ease: EASE }}
         className="relative z-20 mx-auto flex w-full max-w-[1120px] items-center justify-between px-6 py-5"
       >
@@ -51,8 +52,14 @@ export default function App() {
         </SecondaryButton>
       </motion.header>
 
-      <main className="relative z-10">
-        <Hero onOpenChat={openChat} onSendStarter={sendStarter} />
+      <motion.main
+        className="relative z-10"
+        animate={{ scale: chatOpen ? 0.985 : 1, opacity: chatOpen ? 0.6 : 1 }}
+        transition={{ duration: 0.5, ease: EASE }}
+      >
+        <ParallaxLayer from={0} to={-48} fade offset={['start start', 'end start']}>
+          <Hero onOpenChat={openChat} onSendStarter={sendStarter} />
+        </ParallaxLayer>
 
         {/* Divider */}
         <div
@@ -60,7 +67,9 @@ export default function App() {
           style={{ background: 'var(--border-subtle)' }}
         />
 
-        <Capabilities />
+        <ParallaxLayer from={26} to={-26}>
+          <Capabilities />
+        </ParallaxLayer>
 
         {/* Divider */}
         <div
@@ -68,8 +77,10 @@ export default function App() {
           style={{ background: 'var(--border-subtle)' }}
         />
 
-        <AboutCreator />
-      </main>
+        <ParallaxLayer from={26} to={-26}>
+          <AboutCreator />
+        </ParallaxLayer>
+      </motion.main>
 
       <footer
         className="relative z-10 border-t px-6 py-10 text-center"

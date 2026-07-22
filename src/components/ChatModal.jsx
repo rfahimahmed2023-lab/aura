@@ -39,7 +39,7 @@ export default function ChatModal({ open, onClose, status }) {
         className="absolute inset-0 bg-[rgba(8,8,13,0.72)] backdrop-blur-md"
         initial={false}
         animate={{ opacity: open ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: EASE }}
+        transition={{ duration: 0.5, ease: EASE }}
         onClick={onClose}
       />
 
@@ -53,10 +53,10 @@ export default function ChatModal({ open, onClose, status }) {
         initial={false}
         animate={{
           opacity: open ? 1 : 0,
-          scale: open ? 1 : 0.96,
-          y: open ? 0 : 8,
+          scale: open ? 1 : 0.94,
+          y: open ? 0 : 18,
         }}
-        transition={{ duration: 0.45, ease: EASE }}
+        transition={{ duration: 0.55, ease: EASE }}
       >
         {/* Header */}
         <div className="relative z-10 flex items-center gap-3 border-b border-white/[0.08] bg-white/[0.02] px-4 py-3">
