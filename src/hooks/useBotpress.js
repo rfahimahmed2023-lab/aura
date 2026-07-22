@@ -51,6 +51,11 @@ const AURA_WEBCHAT_CSS = `
     max-width: 100% !important;
     width: 100% !important;
   }
+  /* Native conversation-history view is driven programmatically behind our
+     own panel — keep it dark so any transient frame looks native */
+  .bpConversationHistoryContainer {
+    background: #0f0f18 !important;
+  }
 `
 
 const AURA_CONFIGURATION = {
@@ -70,7 +75,111 @@ const AURA_CONFIGURATION = {
   // "[⚡ by Botpress](…)") — overriding it with an empty string is sanctioned
   // configuration, not a CSS hack.
   footer: '',
+  // Enables the webchat's own multi-conversation support — required for
+  // switching the active conversation (see switchConversation below).
+  conversationHistory: true,
   additionalStylesheet: AURA_WEBCHAT_CSS,
+}
+
+/**
+ * Merge a patch into the Botpress user's server-side data. updateUser
+ * REPLACES the whole data object, so a read-merge-write is mandatory —
+ * otherwise fields like the time-of-day greeting context get wiped.
+ */
+export async function mergeUserData(patch) {
+  const bp = window.botpress
+  const u = await bp.getUser().catch(() => null)
+  await bp.updateUser({ data: { ...(u?.data || {}), ...patch } })
+}
+
+/** Focus the webchat composer so the user can type immediately. */
+export function focusComposer() {
+  const sr = document.querySelector(`#${WEBCHAT_CONTAINER_ID} .bpEmbeddedWebchat`)?.shadowRoot
+  sr?.querySelector('textarea.bpComposerInput')?.focus()
+}
+
+/**
+ * Switch the live webchat to another conversation and verify it took.
+ *
+ * v3.6 exposes no public method for this, but its built-in conversation
+ * history (enabled above) can switch — so we drive that native mechanism:
+ * open the history view (hidden behind our UI), match the target id inside
+ * the native list via its React props, click the real item, then poll
+ * window.botpress.conversationId until it equals the target. Returns false
+ * rather than pretending, if any step fails. Stable here because the
+ * embed pins inject.js to v3.6.
+ */
+export async function switchConversation(targetId) {
+  const bp = window.botpress
+  if (!bp?.initialized) return false
+  if (bp.conversationId === targetId) return true
+  const sr = document.querySelector(`#${WEBCHAT_CONTAINER_ID} .bpEmbeddedWebchat`)?.shadowRoot
+  if (!sr) return false
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const poll = async (fn, timeout, step = 150) => {
+    const t0 = Date.now()
+    for (;;) {
+      const v = fn()
+      if (v) return v
+      if (Date.now() - t0 > timeout) return null
+      await wait(step)
+    }
+  }
+  const synthClick = (el) =>
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }))
+
+  try {
+    // 1. Ensure the native history view is open (works while display:none —
+    //    clicks are synthetic and React handlers don't need layout)
+    if (!sr.querySelector('.bpConversationHistoryContainer')) {
+      let icon = sr.querySelector('.bpHeaderConversationHistoryButton svg')
+      if (!icon) {
+        sr.querySelector('button[aria-label="Expand Header Button"]')?.click()
+        icon = await poll(
+          () => sr.querySelector('.bpHeaderConversationHistoryButton svg'),
+          2500,
+        )
+      }
+      if (!icon) return false
+      synthClick(icon)
+    }
+
+    // 2. Wait for the native list items
+    const firstItem = await poll(
+      () => sr.querySelector('.bpConversationHistoryConversationContainer'),
+      6000,
+    )
+    if (!firstItem) return false
+
+    // 3. Map target id → native item index via the panel's React props
+    const fiberKey = Object.keys(firstItem).find((k) => k.startsWith('__reactFiber'))
+    let fiber = firstItem[fiberKey]
+    let panelProps = null
+    for (let i = 0; i < 10 && fiber; i++) {
+      const p = fiber.memoizedProps
+      if (p?.conversations && p?.onConversationClick) {
+        panelProps = p
+        break
+      }
+      fiber = fiber.return
+    }
+    if (!panelProps) return false
+    const items = [...sr.querySelectorAll('.bpConversationHistoryConversationContainer')]
+    const idx = panelProps.conversations.findIndex((c) => c.id === targetId)
+    if (idx < 0 || items.length !== panelProps.conversations.length || !items[idx]) {
+      const closeBtn = sr.querySelector('.bpConversationHistoryCloseButton')
+      if (closeBtn) synthClick(closeBtn)
+      return false
+    }
+
+    // 4. Click the real native item, then verify the switch actually landed
+    items[idx].click()
+    const ok = await poll(() => bp.conversationId === targetId, 5000, 200)
+    return !!ok
+  } catch {
+    return false
+  }
 }
 
 /**
@@ -299,16 +408,28 @@ export function useBotpress() {
 
         // Store the user's real local time on the Botpress user BEFORE the
         // conversation opens, so the greeting reads the correct time of day.
-        // These land in `userData` and are readable by the bot as user
-        // attributes: user.data.timeOfDay, user.data.localHour, etc.
+        // MERGED into existing data (updateUser replaces the object, and
+        // user.data also carries conversation titles — see mergeUserData).
         const timeContext = getLocalTimeContext()
         try {
-          await bp.updateUser({ data: timeContext })
+          const existing = await bp.getUser().catch(() => null)
+          await bp.updateUser({ data: { ...(existing?.data || {}), ...timeContext } })
         } catch (userErr) {
           console.warn('[AURA] Could not set local-time user data', userErr)
         }
 
         bp.open()
+
+        // Always start every visit on a FRESH conversation. Past ones stay
+        // intact (and reachable via the history panel); the new conversation
+        // fires the bot's Conversation Started greeting. configuredRef above
+        // guarantees this runs once per page load — no duplicates.
+        try {
+          await bp.restartConversation()
+        } catch (freshErr) {
+          console.warn('[AURA] Could not start a fresh conversation', freshErr)
+        }
+
         enhancementsCleanup = installWebchatEnhancements(bp)
         setStatus('ready')
       } catch (err) {
