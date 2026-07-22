@@ -57,7 +57,7 @@ export default function AboutCreator() {
             }}
           >
             <img
-              src="/fahim.jpg"
+              src="/Creator.png"
               alt="Fahim Ahmed Rafi"
               width={120}
               height={120}
