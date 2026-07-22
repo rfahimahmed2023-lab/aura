@@ -5,6 +5,7 @@ import Capabilities from './components/Capabilities'
 import AboutCreator from './components/AboutCreator'
 import ChatModal from './components/ChatModal'
 import AmbientBackground from './components/AmbientBackground'
+import AuroraCanvas from './components/AuroraCanvas'
 import BrandMark, { LOGO_SOURCES } from './components/BrandMark'
 import { SecondaryButton } from './components/Buttons'
 import { useBotpress, openWebchat, sendToAura } from './hooks/useBotpress'
@@ -28,6 +29,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground />
+      <AuroraCanvas />
 
       {/* Slim brand header — intentionally low-contrast so the hero stays the focus */}
       <motion.header
@@ -52,7 +54,7 @@ export default function App() {
 
         {/* Divider */}
         <div
-          className="mx-auto h-px w-full max-w-[1120px]"
+          className="divider-live mx-auto h-px w-full max-w-[1120px]"
           style={{ background: 'var(--border-subtle)' }}
         />
 
@@ -60,7 +62,7 @@ export default function App() {
 
         {/* Divider */}
         <div
-          className="mx-auto h-px w-full max-w-[1120px]"
+          className="divider-live mx-auto h-px w-full max-w-[1120px]"
           style={{ background: 'var(--border-subtle)' }}
         />
 

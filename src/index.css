@@ -231,3 +231,99 @@ body {
   border-radius: 0 !important;
   box-shadow: none !important;
 }
+
+/* ============================================================
+   PHASE 1 — AMBIENT CINEMATIC LAYER (append-only additions)
+   All animations below are transform/opacity only, and are
+   globally disabled by the prefers-reduced-motion block above
+   (its `*` rules use !important).
+   ============================================================ */
+
+/* Grid slowly breathes so the backdrop never reads as static */
+.bg-grid {
+  animation: grid-breathe 11s ease-in-out infinite;
+}
+@keyframes grid-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Living dividers: a soft energy sweep travels along the 1px line */
+.divider-live {
+  position: relative;
+  overflow: hidden;
+}
+.divider-live::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 32%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 229, 255, 0.55) 35%,
+    rgba(122, 92, 255, 0.55) 65%,
+    transparent
+  );
+  animation: divider-sweep 7.5s var(--ease-settle) infinite;
+  will-change: transform;
+}
+@keyframes divider-sweep {
+  0% {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    transform: translateX(330%);
+    opacity: 0;
+  }
+}
+
+/* Extra orb halo on a 7.3s period — desynchronized from the orb's own
+   4s breath and 6s float, so the combined motion never reads as a loop */
+.orb-core {
+  position: relative;
+}
+.orb-core::after {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 229, 255, 0.16),
+    rgba(122, 92, 255, 0.1) 55%,
+    transparent 75%
+  );
+  animation: halo-breathe 7.3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes halo-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.96);
+  }
+  45% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+  55% {
+    opacity: 0.72;
+    transform: scale(1.05);
+  }
+}
