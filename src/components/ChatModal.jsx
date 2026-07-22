@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { X, RotateCcw } from 'lucide-react'
+import { X, RotateCcw, History } from 'lucide-react'
 import { WEBCHAT_CONTAINER_ID } from '../hooks/useBotpress'
 import BrandMark, { AVATAR_SOURCES } from './BrandMark'
+import ChatHistory from './ChatHistory'
 import { EASE } from '../lib/motion'
 import { buttonMotion } from '../lib/motion'
 
@@ -12,13 +13,24 @@ import { buttonMotion } from '../lib/motion'
  * the conversation and time-context user data intact across open/close.
  */
 export default function ChatModal({ open, onClose, status }) {
-  // Close on Escape
+  const [historyOpen, setHistoryOpen] = useState(false)
+
+  // Close on Escape (history drawer first, then the modal)
   useEffect(() => {
     if (!open) return
-    const onKey = (e) => e.key === 'Escape' && onClose()
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return
+      if (historyOpen) setHistoryOpen(false)
+      else onClose()
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open, onClose, historyOpen])
+
+  // Drawer shouldn't stay open across modal closes
+  useEffect(() => {
+    if (!open) setHistoryOpen(false)
+  }, [open])
 
   // Lock body scroll while open
   useEffect(() => {
@@ -72,6 +84,16 @@ export default function ChatModal({ open, onClose, status }) {
             <motion.button
               type="button"
               {...buttonMotion}
+              onClick={() => setHistoryOpen(true)}
+              aria-label="Previous chats"
+              title="Previous chats"
+              className="btn-ghost focusable rounded-lg p-2 text-white/50 hover:bg-white/10 hover:text-white"
+            >
+              <History size={16} strokeWidth={2} aria-hidden="true" />
+            </motion.button>
+            <motion.button
+              type="button"
+              {...buttonMotion}
               onClick={() => window.botpress?.restartConversation?.()}
               aria-label="Restart conversation"
               title="Restart conversation"
@@ -112,6 +134,9 @@ export default function ChatModal({ open, onClose, status }) {
             </div>
           )}
         </div>
+
+        {/* Previous-chats slide-over (read-only history) */}
+        <ChatHistory open={historyOpen} onClose={() => setHistoryOpen(false)} />
       </motion.div>
     </div>
   )
