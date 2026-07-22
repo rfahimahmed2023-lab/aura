@@ -327,3 +327,38 @@ body {
     transform: scale(1.05);
   }
 }
+
+/* ============================================================
+   PHASE 2 — REACTIVE LIGHT & TACTILITY (append-only additions)
+   ============================================================ */
+
+/* Capability-card sheen: a soft band of light sweeps across the card face
+   on hover. Scoped to article.card so the creator card (whose photo glow
+   would be clipped by overflow:hidden) is untouched. Transform-only; the
+   reset on hover-out is instant (transition: none) so re-hovering always
+   sweeps forward. */
+article.card {
+  position: relative;
+  overflow: hidden;
+}
+article.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.05) 46%,
+    rgba(0, 229, 255, 0.09) 52%,
+    rgba(122, 92, 255, 0.05) 58%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: none;
+  will-change: transform;
+}
+article.card:hover::before {
+  transform: translateX(130%);
+  transition: transform 0.9s var(--ease-settle);
+}

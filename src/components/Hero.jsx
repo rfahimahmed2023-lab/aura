@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion'
 import { FileText, Compass, BarChart3, ArrowRight } from 'lucide-react'
 import AuraOrb from './AuraOrb'
+import Magnetic from './Magnetic'
+import MouseParallax from './MouseParallax'
 import { PrimaryButton, SecondaryButton } from './Buttons'
 import { heroStagger, heroItem, pageLoadedHidden } from '../lib/motion'
 
@@ -32,7 +34,9 @@ export default function Hero({ onOpenChat, onSendStarter }) {
     >
       {/* Orb — hero anchor */}
       <motion.div variants={heroItem}>
-        <AuraOrb size={132} />
+        <MouseParallax strength={10}>
+          <AuraOrb size={132} />
+        </MouseParallax>
       </motion.div>
 
       {/* Eyebrow / tagline */}
@@ -70,10 +74,12 @@ export default function Hero({ onOpenChat, onSendStarter }) {
 
       {/* Primary CTA */}
       <motion.div variants={heroItem} className="mt-10">
-        <PrimaryButton onClick={onOpenChat} className="text-base">
-          Start chatting
-          <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" />
-        </PrimaryButton>
+        <Magnetic>
+          <PrimaryButton onClick={onOpenChat} className="text-base">
+            Start chatting
+            <ArrowRight size={18} strokeWidth={2.5} aria-hidden="true" />
+          </PrimaryButton>
+        </Magnetic>
       </motion.div>
 
       {/* Feature buttons — one evenly-spaced row (equal width via grid) */}
@@ -82,14 +88,15 @@ export default function Hero({ onOpenChat, onSendStarter }) {
         className="mt-8 grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3"
       >
         {FEATURES.map(({ label, icon, starter }) => (
-          <SecondaryButton
-            key={label}
-            icon={icon}
-            onClick={() => onSendStarter(starter)}
-            className="w-full"
-          >
-            {label}
-          </SecondaryButton>
+          <Magnetic key={label} className="w-full" strength={0.22}>
+            <SecondaryButton
+              icon={icon}
+              onClick={() => onSendStarter(starter)}
+              className="w-full"
+            >
+              {label}
+            </SecondaryButton>
+          </Magnetic>
         ))}
       </motion.div>
     </motion.section>

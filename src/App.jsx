@@ -6,6 +6,7 @@ import AboutCreator from './components/AboutCreator'
 import ChatModal from './components/ChatModal'
 import AmbientBackground from './components/AmbientBackground'
 import AuroraCanvas from './components/AuroraCanvas'
+import Spotlight from './components/Spotlight'
 import BrandMark, { LOGO_SOURCES } from './components/BrandMark'
 import { SecondaryButton } from './components/Buttons'
 import { useBotpress, openWebchat, sendToAura } from './hooks/useBotpress'
@@ -30,6 +31,7 @@ export default function App() {
     <div className="relative min-h-screen overflow-x-hidden">
       <AmbientBackground />
       <AuroraCanvas />
+      <Spotlight />
 
       {/* Slim brand header — intentionally low-contrast so the hero stays the focus */}
       <motion.header
