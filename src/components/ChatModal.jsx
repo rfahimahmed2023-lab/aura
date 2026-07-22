@@ -30,7 +30,7 @@ export default function ChatModal({ open, onClose, status }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 max-sm:bottom-auto max-sm:h-dvh sm:p-6"
       style={{ pointerEvents: open ? 'auto' : 'none' }}
       aria-hidden={!open}
     >
@@ -48,8 +48,8 @@ export default function ChatModal({ open, onClose, status }) {
         role="dialog"
         aria-modal="true"
         aria-label="Chat with AURA"
-        className="gradient-border relative flex w-full max-w-[440px] flex-col overflow-hidden"
-        style={{ height: 'min(680px, 86vh)', boxShadow: 'var(--shadow-card)' }}
+        className="gradient-border relative flex h-full w-full flex-col overflow-hidden sm:h-[min(680px,88vh)] sm:max-w-[460px]"
+        style={{ boxShadow: 'var(--shadow-card)' }}
         initial={false}
         animate={{
           opacity: open ? 1 : 0,

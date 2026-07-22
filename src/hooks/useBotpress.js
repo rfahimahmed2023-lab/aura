@@ -26,6 +26,31 @@ const AURA_WEBCHAT_CSS = `
     border-color: rgba(34, 211, 238, 0.6) !important;
     box-shadow: 0 0 18px rgba(34, 211, 238, 0.18) !important;
   }
+  /* Links in bot messages: brand cyan, violet on hover, always underlined */
+  .bpMessageBlocksTextLink {
+    color: #00e5ff !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px;
+  }
+  .bpMessageBlocksTextLink:hover {
+    color: #7a5cff !important;
+    opacity: 1 !important;
+  }
+  /* Chart/report images: render large and crisp, signal click-to-enlarge */
+  .bpMessageBlocksImageImage,
+  .bpMessageBlocksTextImage {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    cursor: zoom-in;
+    border-radius: 10px;
+  }
+  .bpMessageContainer:has(.bpMessageBlocksImageImage),
+  .bpMessageBlocksBubble:has(.bpMessageBlocksImageImage) {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
 `
 
 const AURA_CONFIGURATION = {
@@ -41,6 +66,10 @@ const AURA_CONFIGURATION = {
   composerPlaceholder: 'Ask AURA about your career…',
   allowFileUpload: true,
   showPoweredBy: false,
+  // `footer` is an officially exposed webchat config field (its default is
+  // "[⚡ by Botpress](…)") — overriding it with an empty string is sanctioned
+  // configuration, not a CSS hack.
+  footer: '',
   additionalStylesheet: AURA_WEBCHAT_CSS,
 }
 
@@ -117,6 +146,114 @@ function getLocalTimeContext() {
   }
 }
 
+/**
+ * Display-layer repairs for the embedded webchat (no bot/logic changes).
+ *
+ * 1) LINK HREF REPAIR — Botpress v3.6's markdown renderer strips `href` from
+ *    anchors and relies on window.open inside an onMouseUp handler, which
+ *    popup blockers routinely kill. We capture link URLs from incoming
+ *    message payloads (bp.on('message')), then patch rendered anchors with a
+ *    real href + target="_blank" rel="noopener noreferrer". A native mouseup
+ *    listener with stopPropagation() prevents Botpress's own handler from
+ *    also firing (which would open the link twice).
+ *
+ * 2) IMAGE CLICK-TO-ENLARGE — chart images open full-size in a new tab.
+ *
+ * 3) BROWSER AI-COMPOSE SUPPRESSION — the "Write with AI" affordance is
+ *    injected by the browser (Edge/Chrome writing assistance), not Botpress;
+ *    the standard opt-out attributes are applied to the composer.
+ *
+ * Returns a cleanup function.
+ */
+function installWebchatEnhancements(bp) {
+  const linkMap = new Map() // link text -> url, harvested from payloads
+  const cleanups = []
+
+  // Harvest [text](url) pairs and bare URLs from every incoming message
+  try {
+    bp.on('message', (msg) => {
+      try {
+        const raw = JSON.stringify(msg ?? {})
+        const mdLink = /\[([^\]]{1,200}?)\]\((https?:\/\/[^)\s"']+)\)/g
+        let m
+        while ((m = mdLink.exec(raw)) !== null) linkMap.set(m[1].trim(), m[2])
+      } catch {
+        /* never let harvesting break the chat */
+      }
+    })
+  } catch {
+    /* on() unavailable — link repair degrades gracefully */
+  }
+
+  const looksLikeUrl = (t) => /^https?:\/\/\S+$/.test(t)
+
+  const patchAnchors = (root) => {
+    root.querySelectorAll('a.bpMessageBlocksTextLink:not([href])').forEach((a) => {
+      const text = a.textContent.trim()
+      const url = linkMap.get(text) || (looksLikeUrl(text) ? text : null)
+      if (!url) return
+      a.setAttribute('href', url)
+      a.setAttribute('target', '_blank')
+      a.setAttribute('rel', 'noopener noreferrer')
+      // Block Botpress's React onMouseUp (window.open) so the link doesn't
+      // open twice — the real href now handles navigation natively.
+      a.addEventListener('mouseup', (e) => e.stopPropagation())
+    })
+  }
+
+  const hardenComposer = (root) => {
+    root.querySelectorAll('textarea.bpComposerInput').forEach((ta) => {
+      ta.setAttribute('writingsuggestions', 'false')
+      ta.setAttribute('data-gramm', 'false')
+      ta.setAttribute('data-enable-grammarly', 'false')
+    })
+  }
+
+  // The webchat renders inside an open shadow root that appears after config
+  let tries = 0
+  const hook = setInterval(() => {
+    tries += 1
+    const host = document.querySelector(`#${WEBCHAT_CONTAINER_ID} .bpEmbeddedWebchat`)
+    const root = host?.shadowRoot
+    if (!root) {
+      if (tries > 100) clearInterval(hook) // ~15s — give up quietly
+      return
+    }
+    clearInterval(hook)
+
+    patchAnchors(root)
+    hardenComposer(root)
+
+    const observer = new MutationObserver(() => {
+      patchAnchors(root)
+      hardenComposer(root)
+    })
+    observer.observe(root, { childList: true, subtree: true })
+    cleanups.push(() => observer.disconnect())
+
+    // Click-to-enlarge for chart/report images (real user click → popup-safe)
+    const onClick = (e) => {
+      const img = e
+        .composedPath()
+        .find(
+          (el) =>
+            el instanceof HTMLImageElement &&
+            (el.classList?.contains('bpMessageBlocksImageImage') ||
+              el.classList?.contains('bpMessageBlocksTextImage')),
+        )
+      if (img?.src) {
+        e.stopPropagation()
+        window.open(img.src, '_blank', 'noopener,noreferrer')
+      }
+    }
+    root.addEventListener('click', onClick, true)
+    cleanups.push(() => root.removeEventListener('click', onClick, true))
+  }, 150)
+  cleanups.push(() => clearInterval(hook))
+
+  return () => cleanups.forEach((fn) => fn())
+}
+
 /** First of these files that exists in public/ becomes the bot avatar. */
 const AVATAR_CANDIDATES = ['/aura-avatar.png', '/aura-avatar.svg', '/aura-avatar.jpg']
 
@@ -144,6 +281,7 @@ export function useBotpress() {
     let cancelled = false
     let pollId = null
     let timeoutId = null
+    let enhancementsCleanup = null
 
     const configure = async () => {
       if (cancelled || configuredRef.current) return
@@ -171,6 +309,7 @@ export function useBotpress() {
         }
 
         bp.open()
+        enhancementsCleanup = installWebchatEnhancements(bp)
         setStatus('ready')
       } catch (err) {
         console.error('[AURA] Failed to configure Botpress webchat', err)
@@ -206,6 +345,7 @@ export function useBotpress() {
       cancelled = true
       if (pollId) clearInterval(pollId)
       if (timeoutId) clearTimeout(timeoutId)
+      if (enhancementsCleanup) enhancementsCleanup()
     }
   }, [])
 

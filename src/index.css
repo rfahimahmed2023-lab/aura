@@ -362,3 +362,18 @@ article.card:hover::before {
   transform: translateX(130%);
   transition: transform 0.9s var(--ease-settle);
 }
+
+/* ============================================================
+   FIX PASS (append-only additions)
+   ============================================================ */
+
+/* Chat goes fullscreen below 640px: square corners, no gradient ring.
+   (.gradient-border is used only by the chat modal panel.) */
+@media (max-width: 639px) {
+  .gradient-border {
+    border-radius: 0;
+  }
+  .gradient-border::before {
+    display: none;
+  }
+}
