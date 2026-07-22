@@ -7,7 +7,6 @@ import ChatModal from './components/ChatModal'
 import AmbientBackground from './components/AmbientBackground'
 import AuroraCanvas from './components/AuroraCanvas'
 import Spotlight from './components/Spotlight'
-import ParallaxLayer from './components/ParallaxLayer'
 import BrandMark, { LOGO_SOURCES } from './components/BrandMark'
 import { SecondaryButton } from './components/Buttons'
 import { useBotpress, openWebchat, sendToAura } from './hooks/useBotpress'
@@ -57,9 +56,9 @@ export default function App() {
         animate={{ scale: chatOpen ? 0.985 : 1, opacity: chatOpen ? 0.6 : 1 }}
         transition={{ duration: 0.5, ease: EASE }}
       >
-        <ParallaxLayer from={0} to={-48} fade offset={['start start', 'end start']}>
-          <Hero onOpenChat={openChat} onSendStarter={sendStarter} />
-        </ParallaxLayer>
+        {/* Sections render directly — parallax lives ONLY on background
+            layers (aurora, mesh, particles, orb); text never moves */}
+        <Hero onOpenChat={openChat} onSendStarter={sendStarter} />
 
         {/* Divider */}
         <div
@@ -67,9 +66,7 @@ export default function App() {
           style={{ background: 'var(--border-subtle)' }}
         />
 
-        <ParallaxLayer from={26} to={-26}>
-          <Capabilities />
-        </ParallaxLayer>
+        <Capabilities />
 
         {/* Divider */}
         <div
@@ -77,9 +74,7 @@ export default function App() {
           style={{ background: 'var(--border-subtle)' }}
         />
 
-        <ParallaxLayer from={26} to={-26}>
-          <AboutCreator />
-        </ParallaxLayer>
+        <AboutCreator />
       </motion.main>
 
       <footer

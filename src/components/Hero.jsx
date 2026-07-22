@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { FileText, Compass, BarChart3, ArrowRight } from 'lucide-react'
 import AuraOrb from './AuraOrb'
 import Magnetic from './Magnetic'
-import MouseParallax from './MouseParallax'
+import ParallaxLayer from './ParallaxLayer'
 import { RevealWord, revealLine, IgnitionBloom } from './CinematicIntro'
 import { PrimaryButton, SecondaryButton } from './Buttons'
 import { heroStagger, heroItem, pageLoadedHidden } from '../lib/motion'
@@ -33,12 +33,12 @@ export default function Hero({ onOpenChat, onSendStarter }) {
       animate="show"
       className="flex flex-col items-center px-6 pt-20 pb-24 text-center sm:pt-28 lg:pt-32"
     >
-      {/* Orb — hero anchor */}
+      {/* Orb — hero anchor; closest parallax depth (background element) */}
       <motion.div variants={heroItem}>
-        <MouseParallax strength={10} className="relative">
+        <ParallaxLayer mouse={0.07} scroll={-24} maxMouse={52} className="relative">
           <IgnitionBloom />
           <AuraOrb size={132} />
-        </MouseParallax>
+        </ParallaxLayer>
       </motion.div>
 
       {/* Eyebrow / tagline */}

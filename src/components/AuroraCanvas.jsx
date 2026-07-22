@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useReducedMotion } from 'framer-motion'
+import ParallaxLayer from './ParallaxLayer'
 
 /**
  * Ambient aurora layer — Canvas 2D, add-only enhancement.
@@ -161,7 +162,17 @@ export default function AuroraCanvas() {
           'radial-gradient(ellipse 85% 72% at 50% 38%, black 30%, transparent 78%)',
       }}
     >
-      <canvas ref={canvasRef} className="h-full w-full" />
+      {/* Deepest parallax layer; scale oversizes the canvas slightly so its
+          edges can never be exposed by the clamped drift */}
+      <ParallaxLayer
+        mouse={0.015}
+        scroll={-30}
+        maxMouse={28}
+        scale={1.06}
+        className="absolute inset-0"
+      >
+        <canvas ref={canvasRef} className="h-full w-full" />
+      </ParallaxLayer>
     </div>
   )
 }

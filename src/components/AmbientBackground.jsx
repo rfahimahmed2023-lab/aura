@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import ParallaxLayer from './ParallaxLayer'
 
 /* Fixed positions so the field is stable across renders; transform/opacity
    only, so everything stays on the GPU compositor. Very low opacity — must
@@ -21,40 +22,45 @@ export default function AmbientBackground() {
 
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 overflow-hidden">
+      {/* Static wash — anchors the scene, never moves */}
       <div className="bg-radial-hero absolute inset-0" />
-      <div className="bg-grid absolute inset-0" />
 
-      {/* Slow-drifting gradient mesh — subtle */}
-      <motion.div
-        className="absolute -top-48 -left-40 h-[38rem] w-[38rem] rounded-full bg-cyan/[0.07] blur-[150px]"
-        animate={reduce ? undefined : { x: [0, 60, -20, 0], y: [0, 40, 80, 0] }}
-        transition={{ duration: 50, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute -bottom-52 -right-32 h-[40rem] w-[40rem] rounded-full bg-violet/[0.07] blur-[160px]"
-        animate={reduce ? undefined : { x: [0, -70, 30, 0], y: [0, -40, -90, 0] }}
-        transition={{ duration: 58, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      {/* DEEP layer: grid + gradient mesh (slowest parallax) */}
+      <ParallaxLayer mouse={0.02} scroll={-40} maxMouse={34} className="absolute inset-0">
+        <div className="bg-grid absolute inset-0" />
+        <motion.div
+          className="absolute -top-48 -left-40 h-[38rem] w-[38rem] rounded-full bg-cyan/[0.07] blur-[150px]"
+          animate={reduce ? undefined : { x: [0, 60, -20, 0], y: [0, 40, 80, 0] }}
+          transition={{ duration: 50, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute -bottom-52 -right-32 h-[40rem] w-[40rem] rounded-full bg-violet/[0.07] blur-[160px]"
+          animate={reduce ? undefined : { x: [0, -70, 30, 0], y: [0, -40, -90, 0] }}
+          transition={{ duration: 58, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </ParallaxLayer>
 
-      {/* Low-density starfield */}
-      {!reduce &&
-        PARTICLES.map(({ left, top, size, dur, delay, violet }, i) => (
-          <motion.span
-            key={i}
-            className={`absolute rounded-full ${violet ? 'bg-violet' : 'bg-cyan'}`}
-            style={{
-              left,
-              top,
-              width: size,
-              height: size,
-              boxShadow: violet
-                ? '0 0 6px 1px rgba(122, 92, 255, 0.4)'
-                : '0 0 6px 1px rgba(0, 229, 255, 0.4)',
-            }}
-            animate={{ y: [0, -24, 0], opacity: [0.08, 0.4, 0.08] }}
-            transition={{ duration: dur, delay, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        ))}
+      {/* MID layer: starfield (moves a little more) */}
+      <ParallaxLayer mouse={0.045} scroll={-60} maxMouse={48} className="absolute inset-0">
+        {!reduce &&
+          PARTICLES.map(({ left, top, size, dur, delay, violet }, i) => (
+            <motion.span
+              key={i}
+              className={`absolute rounded-full ${violet ? 'bg-violet' : 'bg-cyan'}`}
+              style={{
+                left,
+                top,
+                width: size,
+                height: size,
+                boxShadow: violet
+                  ? '0 0 6px 1px rgba(122, 92, 255, 0.4)'
+                  : '0 0 6px 1px rgba(0, 229, 255, 0.4)',
+              }}
+              animate={{ y: [0, -24, 0], opacity: [0.08, 0.4, 0.08] }}
+              transition={{ duration: dur, delay, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          ))}
+      </ParallaxLayer>
     </div>
   )
 }
