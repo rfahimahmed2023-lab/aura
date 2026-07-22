@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import Hero from './components/Hero'
 import Capabilities from './components/Capabilities'
+import AboutCreator from './components/AboutCreator'
 import ChatModal from './components/ChatModal'
 import AmbientBackground from './components/AmbientBackground'
 import BrandMark, { LOGO_SOURCES } from './components/BrandMark'
@@ -56,6 +57,14 @@ export default function App() {
         />
 
         <Capabilities />
+
+        {/* Divider */}
+        <div
+          className="mx-auto h-px w-full max-w-[1120px]"
+          style={{ background: 'var(--border-subtle)' }}
+        />
+
+        <AboutCreator />
       </main>
 
       <footer
@@ -69,6 +78,9 @@ export default function App() {
           </div>
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
             AI-powered Universal Recommendation Assistant
+          </p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Built by Fahim Ahmed Rafi
           </p>
         </div>
       </footer>
