@@ -12,6 +12,11 @@ import { SecondaryButton } from './components/Buttons'
 import { useBotpress, openWebchat, sendToAura } from './hooks/useBotpress'
 import { EASE, pageLoadedHidden } from './lib/motion'
 
+// Show the "About the Creator" section unless explicitly disabled via
+// VITE_SHOW_CREATOR=false. Defaulting to shown means any deployment WITHOUT
+// the variable (including the current main deployment) is unaffected.
+const SHOW_CREATOR = import.meta.env.VITE_SHOW_CREATOR !== 'false'
+
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false)
   const { status } = useBotpress()
@@ -68,13 +73,17 @@ export default function App() {
 
         <Capabilities />
 
-        {/* Divider */}
-        <div
-          className="divider-live mx-auto h-px w-full max-w-[1120px]"
-          style={{ background: 'var(--border-subtle)' }}
-        />
+        {SHOW_CREATOR && (
+          <>
+            {/* Divider */}
+            <div
+              className="divider-live mx-auto h-px w-full max-w-[1120px]"
+              style={{ background: 'var(--border-subtle)' }}
+            />
 
-        <AboutCreator />
+            <AboutCreator />
+          </>
+        )}
       </motion.main>
 
       <footer
