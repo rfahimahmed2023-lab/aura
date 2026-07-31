@@ -98,9 +98,11 @@ export default function App() {
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
             AI-powered Universal Recommendation Assistant
           </p>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Built by Fahim Ahmed Rafi
-          </p>
+          {SHOW_CREATOR && (
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Built by Fahim Ahmed Rafi
+            </p>
+          )}
         </div>
       </footer>
 
